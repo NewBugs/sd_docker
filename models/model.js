@@ -13,6 +13,4 @@ const modelSchema = new Schema({
   flagged: { type: Boolean, required: true },
 });
 
-model = mongoose.model('model', modelSchema);
-
-module.exports = model;
+module.exports = mongoose.model('model', modelSchema);

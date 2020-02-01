@@ -10,7 +10,7 @@
   "flagged": "true"
 }, {
   "cable_section_id": "2",
-  "cable_number": "1",
+  "cable_number": "2",
   "section_number": "2",
   "inspection_date": "1/15/2020",
   "camera_angle": "1",
@@ -20,7 +20,7 @@
   "flagged": "false"
 }, {
   "cable_section_id": "3",
-  "cable_number": "1",
+  "cable_number": "3",
   "section_number": "3",
   "inspection_date": "1/15/2020",
   "camera_angle": "1",
