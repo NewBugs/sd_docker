@@ -34,7 +34,7 @@
 
 top-nav>li {
     display: inline-block;
-    float: left;
+    text-justify: left;
     color: white;
 }
 
@@ -83,7 +83,7 @@ top-nav>li {
         overflow-y: auto;
         background-color: #222;
         /*background-color: #5A6B7D;*/
-        bottom: 0;
+        bottom: 100%;
         overflow-x: hidden;
         padding-bottom: 20px;
     }
@@ -134,7 +134,7 @@ top-nav>li {
       margin-top: 65px;
       width: 150px;
     }
-
+}
 
 .side-nav>li>ul {
     padding: 0;

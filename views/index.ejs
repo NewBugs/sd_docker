@@ -3,7 +3,7 @@
 
 <head>
   <link href="bootstrap.min.css" rel="stylesheet" type="text/css" id="bootstrap-css">
-  <link href="extra.css" rel="stylesheet" type="text/css">
+  <link href="oldCSS.css" rel="stylesheet" type="text/css">
   <script src="jquery-3.4.1.min.js"></script>
   <script src="bootstrap.min.js"></script>
 
@@ -18,94 +18,82 @@
 </head>
 
 <body>
-  <header id="header" class="headroom">
-      <div class="navbar navbar-fixed-top navbar-inverse" role="navigation">
-          <div class="container-fluid">
-
-              <div class="navbar-header">
-                  <p class="pull-left visible-xs">
-                      <button id="offcanvasleft" class="btn btn-xs" type="button" data-toggle="offcanvasleft"><i class="glyphicon glyphicon-chevron-left"></i></button>
-                  </p>
-                  <p class="pull-right visible-xs">
-                      <button id="offcanvasright" class="btn btn-xs" type="button" data-toggle="offcanvasright"><i class="glyphicon glyphicon-chevron-right"></i></button>
-                  </p>
-                  <button class="navbar-toggle" type="button" data-target=".navbar-collapse" data-toggle="collapse">
-                      <span class="icon-bar"></span>
-                      <span class="icon-bar"></span>
-                  </button>
-                  <a class="navbar-brand" href="">
-                      <img src="ula.png" alt="LOGO">
-                  </a>
-              </div>
-              <div class="collapse navbar-collapse">
-                  <ul class="nav navbar-nav">
-                      <li><a href="#">Home</a></li>
-                      <li class="active"> <a href="#InspectionViewer">Inspection Viewer</a> </li>
-                  </ul>
-                  <ul class="nav navbar-right top-nav dropdown">
-                      <!-- ADD Inspection DATE  -->
-                      <li>
-                      <a>Inspection Data Colllected on 1/16/2020</a>
-                      </li>
-
-                </ul>
-              </div>
-
-              <!-- /.nav-collapse -->
-
-          </div>
-          <!-- /.container -->
-      </div>
-      <!-- /.navbar -->
-  </header>
 
 <div id="throbber" style="display:none; min-height:120px;"></div>
 <div id="noty-holder"></div>
 <div id="container-fluid">
 
     <!-- Navigation -->
-    <div class="row row-offcanvas row-offcanvas-left">
-        <div class="row-offcanvas row-offcanvas-right">
-            <div class="col-xs-6 col-sm-1 sidebar-offcanvas" id="sidebarLeft" role="navigation">
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+          </button>
+          <!-- ADD MAIN ADDRESS REF AND HAVE LOCAL LINK PHOTO -->
+          <a class="navbar-brand" href="">
+              <img src="ula.png" alt="LOGO">
+          </a>
+      </div>
+      <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+            <li><a href="#">Home</a></li>
+            <li class="active"> <a href="#InspectionViewer">Inspection Viewer</a> </li>
+        </ul>
+        <ul class="nav navbar-right top-nav dropdown">
+            <!-- ADD Inspection DATE  -->
+            <li>
+            <a>Inspection Data Colllected on 1/16/2020</a>
+            </li>
 
-              <div class="collapse navbar-collapse navbar-ex1-collapse">
-                  <ul class="nav navbar-nav side-nav">
+        </ul>
+      </div>
+      
 
-                      <li>
-                          <a href="#" data-toggle="collapse" data-target="#cable-1"> Cable 1 <i class="fa fa-fw fa-angle-down pull-right"></i></a>
-                          <ul id="cable-1" class="collapse">
-                            <% models.forEach(function(model) { %>
-                              <% if(model.cable_number == 1) {%>
-                              <li><a href="#" id="testClick"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
-                              <% } %>
-                            <% }); %>
+      <!-- Top Menu Items -->
+    
+      <div class="col-xs-6 col-sm-1 sidebar-offcanvas" id="sidebarLeft" role="navigation">
 
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav side-nav">
 
-                          </ul>
-                      </li>
-                      <li>
-                          <a href="#" data-toggle="collapse" data-target="#cable-2"> Cable 2 <i class="fa fa-fw fa-angle-down pull-right"></i></a>
-                          <ul id="cable-2" class="collapse">
-                            <% models.forEach(function(model) { %>
-
-                              <% if(model.cable_number == 2) { %>
-                              <li><a href="#" id="testClick2"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
-                              <% } %>
-                            <% }); %>
+                <li>
+                    <a href="#" data-toggle="collapse" data-target="#cable-1"> Cable 1 <i class="fa fa-fw fa-angle-down pull-right"></i></a>
+                    <ul id="cable-1" class="collapse">
+                      <% models.forEach(function(model) { %>
+                        <% if(model.cable_number == 1) {%>
+                        <li><a href="#"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                        <% } %>
+                      <% }); %>
 
 
-                          </ul>
-                      </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" data-toggle="collapse" data-target="#cable-2"> Cable 2 <i class="fa fa-fw fa-angle-down pull-right"></i></a>
+                    <ul id="cable-2" class="collapse">
+                      <% models.forEach(function(model) { %>
 
-                  </ul>
-              </div>
-                <!--/.well -->
-            </div>
+                        <% if(model.cable_number == 2) { %>
+                        <li><a href="#" id="testClick2"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                        <% } %>
+                      <% }); %>
+
+
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+          <!--/.well -->
+      </div>
             <!--/span-->
 
-            <div class="col-xs-12 col-sm-10">
+            <div class="page-wrapper">
 
-                  <div class="container-fluid">
                     <canvas id="myCanvasElement">
                     </canvas>
 
@@ -113,12 +101,12 @@
 
 
                       <!-- /.row -->
-                  </div>
+                  
 
             </div>
             <!--/span-->
 
-            <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <!-- <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <ul class="nav navbar-nav rightside-nav">
 
                     <li>
@@ -126,7 +114,7 @@
                         <ul id="flaggedcable-1" class="collapse">
                           <% models.forEach(function(model) { %>
                             <% if(model.cable_number == 1) {%>
-                            <li><a href="#" id="testClick"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                            <li><a href="#" id="testClick3"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
                             <% } %>
                           <% }); %>
 
@@ -139,7 +127,7 @@
                           <% models.forEach(function(model) { %>
 
                             <% if(model.cable_number == 2) { %>
-                            <li><a href="#" id="testClick2"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                            <li><a href="#" id="testClick4"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
                             <% } %>
                           <% }); %>
 
@@ -148,13 +136,13 @@
                     </li>
 
                 </ul>
-            </div>
+            </div> -->
               <!--/.well -->
+            </nav>
+
           </div>
 
-    </div>
-  </div>
-
+    
 
     <hr>
 
