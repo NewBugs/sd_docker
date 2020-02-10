@@ -6,8 +6,6 @@ views/bootstrap.min.js
 views/column.obj
 views/jquery-3.4.1.min.js
 views/ula.png
-views/oldCSS.css
-views/oldhtml.html
 node_modules
 wait-for.sh
 test

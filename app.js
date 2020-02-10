@@ -19,10 +19,10 @@ app.use(express.static(path+'three.js/'));
 app.use('/', routes);
 
 // PARSE JSON FILE
-let modelData = fs.readFileSync('modelTest.json');
-let models = JSON.parse(modelData);
-model.insertMany(models) // using Mongoose
-console.log(models);
+// let modelData = fs.readFileSync('modelTest.json');
+// let models = JSON.parse(modelData);
+// model.insertMany(models) // using Mongoose
+// console.log(models);
 
 const port = process.env.PORT || 8080;
 

@@ -24,7 +24,7 @@
 <div id="container-fluid">
 
     <!-- Navigation -->
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <!-- Brand and toggle get grouped for better mobile display -->
       <div class="navbar-header">
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
@@ -85,6 +85,32 @@
 
                     </ul>
                 </li>
+                <li>
+                  <a href="#" data-toggle="collapse" data-target="#cable-3"> Cable 3 <i class="fa fa-fw fa-angle-down pull-right"></i></a>
+                  <ul id="cable-3" class="collapse">
+                    <% models.forEach(function(model) { %>
+
+                      <% if(model.cable_number == 3) { %>
+                      <li><a href="#" id="testClick3"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                      <% } %>
+                    <% }); %>
+
+
+                  </ul>
+              </li>
+              <li>
+                <a href="#" data-toggle="collapse" data-target="#cable-4"> Cable 4 <i class="fa fa-fw fa-angle-down pull-right"></i></a>
+                <ul id="cable-4" class="collapse">
+                  <% models.forEach(function(model) { %>
+
+                    <% if(model.cable_number == 4) { %>
+                    <li><a href="#" id="testClick4"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                    <% } %>
+                  <% }); %>
+
+
+                </ul>
+            </li>
 
             </ul>
         </div>
@@ -106,7 +132,7 @@
             </div>
             <!--/span-->
 
-            <!-- <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <ul class="nav navbar-nav rightside-nav">
 
                     <li>
@@ -136,11 +162,22 @@
                     </li>
 
                 </ul>
-            </div> -->
+            </div>
               <!--/.well -->
-            </nav>
 
-          </div>
+              <div class="navbar-footer">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="">
+                    <img src="ula.png" alt="LOGO">
+                </a>
+            </div>
+            
+</nav>
 
     
 
@@ -167,7 +204,7 @@ var container;
 var camera, scene, renderer, controls;
 
 // Debug
-var windowHalfX = window.innerWidth - (window.innerWidth * .24);
+var windowHalfX = window.innerWidth - 300;
 var windowHalfY = window.innerHeight - 120;
 // Debug
 
@@ -267,7 +304,7 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 
-  renderer.setSize( window.innerWidth - (window.innerWidth * .24), window.innerHeight - 120);
+  renderer.setSize( window.innerWidth - 300, window.innerHeight - 120);
   controls.handleResize();
 }
 
