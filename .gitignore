@@ -1,11 +1,13 @@
 .env
-modelTest.json
 views/three.js
 views/bootstrap.min.css
 views/bootstrap.min.js
 views/column.obj
 views/jquery-3.4.1.min.js
+views/font-awesome.min.css
 views/ula.png
+views/original_images
+views/oldhtml.html
 node_modules
 wait-for.sh
 test

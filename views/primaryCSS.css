@@ -1,4 +1,3 @@
-@import url('https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css');
 @media(min-width:768px) {
     body {
         margin-top: 50px;
@@ -77,7 +76,7 @@ top-nav>li {
         position: fixed;
         top: 60px;
         left: 0;
-        width: 150px;       
+        width: 150px;
         border: inherit;
         border-radius: 0;
         border-top: 0px rgba(0,0,0,.5) solid;
@@ -104,7 +103,7 @@ top-nav>li {
         position: fixed;
         top: 60px;
         right: 0;
-        width: 150px;       
+        width: 150px;
         border: inherit;
         border-radius: 0;
         border-top: 0px rgba(0,0,0,.5) solid;
@@ -118,7 +117,7 @@ top-nav>li {
 
     .col-sm-1{
         width: 150px;
-        
+
       }
 }
 
@@ -162,4 +161,59 @@ top-nav>li {
 .navbar-brand>img {
     width: 100px;
     padding: 0px 10px;
+}
+
+.flag{
+  position: absolute;
+  margin: 200px;
+  margin-bottom: 100px;
+}
+
+.original{
+  position: absolute;
+  margin: 200px;
+  margin-bottom: 100px;
+}
+
+.modal-dialog {
+  position: relative;
+  width: auto;
+  margin: 10px;
+  color: #333;
+}
+
+.modal-header {
+    background-color: #333;
+}
+
+
+.modal-title {
+    color: white;
+}
+
+.modal-header
+.close {
+    color: white;
+}
+
+h3 {
+  top: 50px;
+  left: 165px;
+  position: fixed;
+  color: white;
+}
+
+h5 {
+  margin: 10px;
+  color: white;
+}
+
+.flagCable {
+  color: orange;
+}
+
+.progress {
+  margin-top: 15px;
+  width: 50%;
+  margin-left: 25%;
 }

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link href="bootstrap.min.css" rel="stylesheet" type="text/css" id="bootstrap-css">
+  <link href="primaryCSS.css" rel="stylesheet" type="text/css">
+  <script src="jquery-3.4.1.min.js"></script>
+  <script src="bootstrap.min.js"></script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Node App with 3D Model</title>
+  <style>
+		body { margin: 0; }
+		canvas { width: 100%; height: 100% }
+	</style>
+</head>
+
+<body>
+
+<div id="throbber" style="display:none; min-height:120px;"></div>
+<div id="noty-holder"></div>
+<div id="container-fluid">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+
+          <!-- ADD MAIN ADDRESS REF AND HAVE LOCAL LINK PHOTO -->
+          <a class="navbar-brand" href="">
+              <img src="ula.png" alt="LOGO">
+          </a>
+      </div>
+      <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+            <li><a href="/">Home</a></li>
+            <li class="active"> <a href="/inspection">Inspection Viewer</a> </li>
+        </ul>
+        <ul class="nav navbar-right top-nav dropdown">
+            <!-- ADD Inspection DATE  -->
+            <li>
+            <a>Inspection Data Collected on <%= inspection_date.substring(0,inspection_date.indexOf("00:00"))%></a>
+            </li>
+
+        </ul>
+      </div>
+
+
+      <!-- Top Menu Items -->
+
+      <div class="col-xs-6 col-sm-1 sidebar-offcanvas" id="sidebarLeft" role="navigation">
+
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+          <ul class="nav navbar-nav side-nav">
+              <!-- List all Cable Sections by Cable Number-->
+              <h5> All Cable Sections </h5>
+              <li>
+                  <a href="#" id="ignore" data-toggle="collapse" data-target="#cable-1"> Cable 1 <i id="ignore" class="pull-right"></i></a>
+                  <ul id="cable-1" class="collapse">
+                    <% models.forEach(function(model) { %>
+                      <% if(model.cable_number == 1) {%>
+                      <li><a href="#<%= model.cable_section_id%>" id="<%= model.cable_section_id%>"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                      <% } %>
+                    <% }); %>
+
+
+                  </ul>
+              </li>
+              <li>
+                  <a href="#" id="ignore" data-toggle="collapse" data-target="#cable-2"> Cable 2 <i id="ignore" class="pull-right"></i></a>
+                  <ul id="cable-2" class="collapse">
+                    <% models.forEach(function(model) { %>
+                      <% if(model.cable_number == 2) { %>
+                      <li><a href="#<%= model.cable_section_id%>" id="<%= model.cable_section_id%>"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                      <% } %>
+                    <% }); %>
+
+
+                  </ul>
+              </li>
+              <li>
+                <a href="#" id="ignore" data-toggle="collapse" data-target="#cable-3"> Cable 3 <i id="ignore" class="fa fa-fw fa-angle-down pull-right"></i></a>
+                <ul id="cable-3" class="collapse">
+                  <% models.forEach(function(model) { %>
+                    <% if(model.cable_number == 3) { %>
+                    <li><a href="#<%= model.cable_section_id%>" id="<%= model.cable_section_id%>"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                    <% } %>
+                  <% }); %>
+
+
+                </ul>
+              </li>
+              <li>
+                <a href="#" id="ignore" data-toggle="collapse" data-target="#cable-4"> Cable 4 <i id="ignore" class="fa fa-fw fa-angle-down pull-right"></i></a>
+                <ul id="cable-4" class="collapse">
+                  <% models.forEach(function(model) { %>
+                    <% if(model.cable_number == 4) { %>
+                    <li><a href="#<%= model.cable_section_id%>" id="<%= model.cable_section_id%>"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                    <% } %>
+                  <% }); %>
+
+
+                </ul>
+              </li>
+
+            </ul>
+
+        </div>
+
+          <!--/.well -->
+      </div>
+            <!--/span-->
+
+            <div class="page-wrapper">
+              <!-- Canvas for Three.js-->
+              <canvas id="myCanvasElement"></canvas>
+
+
+              <!-- Flag/Unflag Buttons-->
+              <% models.forEach(function(model) { %>
+                <%  if (model.cable_section_id == sid && model.flagged == false) { %>
+                  <h3>Cable: <%= model.cable_number%> - Section: <%= model.section_number%></h3>
+                  <form method="POST" action="/inspection/flag?id=<%= model.inspection_date%>&sid=<%= sid%>">
+                  <input type="submit" style="right:0; bottom:0;" id="flag" class="flag" value="FLAG">
+                </form>
+
+              <% } else if (model.cable_section_id == sid && model.flagged == true) { %>
+                <h3 class="flagCable">Cable: <%= model.cable_number%> - Section: <%= model.section_number%></h3>
+                <form method="POST" action="/inspection/unflag?id=<%= model.inspection_date%>&sid=<%= sid%>">
+                <input type="submit" style="right:0; bottom:0;" id="unflag" class="flag" value="UNFLAG">
+              <% } }); %>
+                </form>
+
+              <!-- <form method="POST" action="/original_photos">
+                <input type="submit" style="bottom:0; left:0;" id="original_photos" class="original" value="See Original Photos">
+              </form> -->
+              <button type="button" style="bottom:0; left:0;" class="original" data-toggle="modal" data-target="#myModal">See Original Photos</button>
+
+
+            </div>
+
+            <!--/span-->
+
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav rightside-nav">
+                  <h5 class="flagCable"> Flagged Sections </h5>
+                  <!-- List all Flagged Sections -->
+                    <li>
+                        <a href="#" id="ignore" data-toggle="collapse" data-target="#flaggedcable-1"> Cable 1 <i id="ignore" class="fa fa-fw fa-angle-down pull-right"></i></a>
+                        <ul id="flaggedcable-1" class="collapse">
+                          <% models.forEach(function(model) {
+                            if(model.cable_number == 1 && model.flagged == true) { %>
+
+                              <li><a href="#" id="<%= model.cable_section_id%>"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                            <% } %>
+                          <% }); %>
+
+
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" id="ignore" data-toggle="collapse" data-target="#flaggedcable-2"> Cable 2 <i id="ignore" class="fa fa-fw fa-angle-down pull-right"></i></a>
+                        <ul id="flaggedcable-2" class="collapse">
+                          <% models.forEach(function(model) {
+                            if(model.cable_number == 2 && model.flagged == true) {%>
+                              <li><a href="#" id="<%= model.cable_section_id%>"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                            <% }  %>
+                          <% }); %>
+
+
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" id="ignore" data-toggle="collapse" data-target="#flaggedcable-3"> Cable 3 <i id="ignore" class="fa fa-fw fa-angle-down pull-right"></i></a>
+                        <ul id="flaggedcable-3" class="collapse">
+                          <% models.forEach(function(model) {
+                            if(model.cable_number == 3 && model.flagged == true) {%>
+                              <li><a href="#" id="<%= model.cable_section_id%>"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                            <% }  %>
+                          <% }); %>
+
+
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" id="ignore" data-toggle="collapse" data-target="#flaggedcable-4"> Cable 4 <i id="ignore" class="fa fa-fw fa-angle-down pull-right"></i></a>
+                        <ul id="flaggedcable-4" class="collapse">
+                          <% models.forEach(function(model) {
+                            if(model.cable_number == 4 && model.flagged == true) {%>
+                              <li><a href="#" id="<%= model.cable_section_id%>"><i class="fa fa-angle-double-right"></i> <%= model.section_number; %> </a></li>
+                            <% }  %>
+                          <% }); %>
+
+
+                        </ul>
+                    </li>
+
+                </ul>
+            </div>
+              <!--/.well -->
+
+              <div class="navbar-footer">
+                <div class="progress">
+                  <div class="progress-bar progress-bar-striped" style="width:40%">
+                  </div>
+                </div>
+              </div>
+
+</nav>
+
+<!-- Modal for Original Photos -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Original Images</h4>
+      </div>
+      <div class="modal-body">
+
+        <!-- Image Carousel inside the modal -->
+        <div class="container">
+          <div id="myCarousel" class="carousel slide" data-ride="carousel">
+            <!-- Indicators -->
+            <ol class="carousel-indicators">
+              <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+              <li data-target="#myCarousel" data-slide-to="1"></li>
+              <li data-target="#myCarousel" data-slide-to="2"></li>
+              <li data-target="#myCarousel" data-slide-to="3"></li>
+            </ol>
+
+            <!-- Wrapper for original images -->
+            <div class="carousel-inner">
+              <% models.forEach(function(model) {
+                if(model.cable_section_id == sid) {%>
+
+              <div class="item active">
+                <img src="<%= model.original_image1_path%>" alt="angle-A" style="width:100%;">
+                <div class="carousel-caption">
+                  <h3>Angle - A</h3>
+                </div>
+              </div>
+
+              <div class="item">
+                <img src="<%= model.original_image2_path%>" alt="angle-B" style="width:100%;">
+                <div class="carousel-caption">
+                  <h3>Angle - B</h3>
+                </div>
+              </div>
+
+              <div class="item">
+                <img src="<%= model.original_image3_path%>" alt="angle-C" style="width:100%;">
+                <div class="carousel-caption">
+                  <h3>Angle - C</h3>
+                </div>
+              </div>
+
+              <div class="item">
+                <img src="<%= model.original_image4_path%>" alt="angle-D" style="width:100%;">
+                <div class="carousel-caption">
+                  <h3>Angle - D</h3>
+                </div>
+              </div>
+              <% }  %>
+            <% }); %>
+            </div>
+
+            <!-- Left and right controls -->
+            <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+              <span class="carousel-control-prev-icon"></span>
+              <span class="sr-only">Previous</span>
+            </a>
+            <a class="right carousel-control" href="#myCarousel" data-slide="next">
+              <span class="carousel-control-next-icon"></span>
+              <span class="sr-only">Next</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <!-- <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div> -->
+    </div>
+
+  </div>
+</div>
+
+
+
+    <hr>
+
+    <footer>
+        <p>Faber 2020</p>
+    </footer>
+
+</div><!-- /.container -->
+
+</body>
+
+</html>
+
+<script type="module">
+
+// var testClick = document.getElementById('testClick');
+// testClick.onclick = function()
+// {
+//     System.out.println(controls.target.get());
+//      controls.target.set( 400, 0, 190 );
+//      webGLRenderer.render(scene, camera);
+// };
+//
+
+
+var buttons = document.getElementsByTagName("li");
+for (let i = 0; i < buttons.length; i++) {
+  buttons[i].addEventListener("click", onButtonClick, false);
+  // console.log(buttons[i].id);
+
+
+};
+
+
+function onButtonClick(event) {
+  if(event.target.id == "ignore"){
+  }
+  else if (event.target.id == "original_photos"){
+
+  }
+  else if (!isNaN(event.target.id) && event.target.id != ""){
+    // console.log(event.target.id);
+
+    // Update sid query string
+    var url = window.location.href;
+    url = url.substring(0, url.indexOf("sid=")) + "sid="+event.target.id;
+    window.location.href = url;
+
+      // if (history.pushState) {
+      //   var urlParams = new URLSearchParams(window.location.search);
+      //     var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?id='+ urlParams.get('id')+'&sid='+event.target.id;
+      //     window.history.pushState({path:newurl},'',newurl);
+      // }
+
+
+    // controls.target.set( 400, 0, 190 );
+    // webGLRenderer.render(scene, camera);
+  }
+}
+
+import * as THREE from '/three.js/build/three.module.js';
+import { OBJLoader } from '/three.js/jsm/loaders/OBJLoader.js';
+import { OrbitControls } from '/three.js/jsm/controls/OrbitControls.js';
+import { TrackballControls } from '/three.js/jsm/controls/TrackballControls.js';
+
+var container;
+var camera, scene, renderer, controls;
+
+// Debug
+var windowHalfX = window.innerWidth - 300;
+var windowHalfY = window.innerHeight - 120;
+// Debug
+
+var object;
+init();
+animate();
+
+function init() {
+  container = document.createElement( 'div' );
+  document.body.appendChild( container );
+  camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
+  camera.position.z = 190;
+  camera.position.x = 400;
+
+  // scene
+  scene = new THREE.Scene();
+
+  var pointLight = new THREE.PointLight( 0xffffff, 0.8 );
+  camera.add( pointLight );
+  scene.add( camera );
+
+  renderer = new THREE.WebGLRenderer( { antialias: true , canvas: myCanvasElement} );
+  renderer.setPixelRatio( window.devicePixelRatio );
+  renderer.setSize( windowHalfX , windowHalfY);
+  // document.body.appendChild( renderer.domElement );
+
+
+
+  // manager
+  function loadModel() {
+    object.traverse( function ( child ) {
+      if ( child.isMesh ) child.material.map = texture;
+    } );
+    object.position.y = - 80;
+
+
+    // DEBUG:
+    var bb = new THREE.Box3()
+    bb.setFromObject(object);
+    bb.center(controls.target);
+
+    scene.add( object );
+  }
+
+  var manager = new THREE.LoadingManager( loadModel );
+  manager.onProgress = function ( item, loaded, total ) {
+    console.log( item, loaded, total );
+  };
+
+  // texture
+  var textureLoader = new THREE.TextureLoader( manager );
+  var texture = textureLoader.load( 'textures/uv_grid_opengl.jpg' );
+
+  // model
+  function onProgress( xhr ) {
+    if ( xhr.lengthComputable ) {
+      var percentComplete = xhr.loaded / xhr.total * 100;
+      console.log( 'model ' + Math.round( percentComplete, 2 ) + '% downloaded' );
+    }
+  }
+
+  function onError() {}
+  var loader = new OBJLoader( manager );
+  loader.load( 'column.obj', function ( obj ) {
+    object = obj;
+  }, onProgress, onError );
+
+  //
+  // renderer = new THREE.WebGLRenderer();
+  // renderer.setPixelRatio( window.devicePixelRatio );
+  // renderer.setSize( window.innerWidth, window.innerHeight );
+  // container.appendChild( renderer.domElement );
+  // document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+  //
+
+  window.addEventListener( 'resize', onWindowResize, false );
+
+
+  // controls
+  createControls( camera );
+
+}
+function createControls( camera ) {
+
+controls = new TrackballControls( camera, renderer.domElement );
+
+controls.rotateSpeed = 1.0;
+controls.zoomSpeed = 1.0;
+controls.enableZoom = true;
+controls.enablePan = false;
+controls.minDistance = 100;
+controls.maxDistance = 500;
+
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize( window.innerWidth - 300, window.innerHeight - 120);
+  controls.handleResize();
+}
+
+function animate() {
+
+  requestAnimationFrame( animate );
+
+  controls.update();
+
+  render();
+
+}
+
+
+//
+function render() {
+  var axesHelper = new THREE.AxesHelper(100);
+  scene.add( axesHelper );
+
+  // System.out.println(camera.getWorldDirection ( target : Vector3 ) );
+  renderer.render( scene, camera );
+}
+
+</script>

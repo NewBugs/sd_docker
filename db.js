@@ -11,7 +11,7 @@ const options = {
   useUnifiedTopology: true,
   // reconnectTries: Number.MAX_VALUE,
   // reconnectInterval: 500,
-  connectTimeoutMS: 10000,
+  connectTimeoutMS: 10000
 };
 
 // MongoDB server
