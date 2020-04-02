@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Assignment 1</title>
+    <script  src="https://threejs.org/build/three.js"></script>
+    <script  src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+    <script src='https://threejs.org/examples/js/libs/dat.gui.min.js'></script>
+    <script  src= "https://threejs.org/examples/js/loaders/OBJLoader.js"> </script>
+    <script src= "https://threejs.org/examples/js/loaders/MTLLoader.js"> </script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <script>
+       //Joseph Potter 3854504
+	   //Assignment 1
+	   //CAP 4720
+	   
+	
+      function mainFunction(){
+		
+        let renderer = new THREE.WebGLRenderer( { antialias: true } );//let renderer = new THREE.WebGLRenderer();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setPixelRatio( window.devicePixelRatio );
+
+        renderer.setClearColor (0x888888, 1);
+        document.body.appendChild( renderer.domElement );
+
+        let scene = new THREE.Scene();
+
+        let aspect = window.innerWidth / window.innerHeight;
+        let camera = new THREE.PerspectiveCamera( 30, aspect, 1, 1000 );
+        camera.position.z = 10;
+		
+        scene.add(camera);
+
+        let keyLight = new THREE.DirectionalLight(0xc10000, 1.0);
+        keyLight.position.set(0.2, 1, 0.5);
+
+        let fillLight = new THREE.DirectionalLight(0xff7105, 0.8);
+        fillLight.position.set(1, 0, 1);
+
+        let backLight = new THREE.DirectionalLight(0xffaa00, 0.7);
+        backLight.position.set(1, -0.5, -1).normalize();
+
+        scene.add(keyLight);
+        scene.add(fillLight);
+        scene.add(backLight);
+
+        let render = function () {
+          renderer.render( scene, camera );
+        };
+
+        let cameraControls = new THREE.OrbitControls( camera, renderer.domElement  );
+        cameraControls.addEventListener("change",render,false)
+		let cameraUpdate = function(){
+
+		if (camera.near > camera.far)
+		camera.near = camera.far - 0.01;
+		camera.updateProjectionMatrix();
+		render();
+		}
+		/*var camMenu = gui.addFolder('Camera');
+		camMenu.add(camera, 'fov', 5, 120, 1)
+		.name( "Field of View" )
+		.onChange( cameraUpdate );;
+		camMenu.add(camera, 'near', 4, 5, 0.01)
+		.name( "near" )
+		.onChange( cameraUpdate );
+		camMenu.add(camera, 'far', 4, 6, 0.01)
+		.name( "far" )
+		.onChange( cameraUpdate );
+		*/
+        // add your MTL and OBJ file loading related code.
+		let bBox = new THREE.Box3();
+		let boxCenter = new THREE.Vector3();
+		let boxSize = new THREE.Vector3();
+		let boxDiagonal = boxSize.length();
+		var loader = new THREE.OBJLoader();
+		loader.load('Segment.obj',
+			function onLoadObj(obj)
+			{
+				bBox.setFromObject(obj);
+				bBox.getCenter(boxCenter);
+				bBox.getSize(boxSize);
+		
+				boxDiagonal = boxSize.length();
+		
+				camera.position.z = boxCenter.z + 1.5*boxDiagonal;
+				camera.lookAt(boxCenter);
+				camera.far = boxDiagonal*7;
+				camera.updateProjectionMatrix();
+		
+				cameraControls.target = boxCenter;
+				console.log(boxSize);
+				//scene.add(obj);
+				render();
+			},
+			function(object){
+				render();
+			},
+			function(xhr){
+				console.log((xhr.loaded/xhr.total*100) + '% loaded');
+			},
+			function(error){
+				console.log('An error happened');
+			}
+		);
+		
+		
+		let mtlLoader = new THREE.MTLLoader();
+		mtlLoader.load('Segment.mtl',
+		// called when resource is loaded
+		function ( mtl ) {
+		// once material is read initiate the obj Loading
+		let objLoader = new THREE.OBJLoader();
+		// objLoader needs material information.
+		objLoader.setMaterials(mtl);
+		// load a resource
+		objLoader.load('Segment.obj' ,function(object){
+		console.log(object);
+		//scene.add( object );
+		render(); // may be make a call to your render function
+		})
+		}
+		);
+		
+		/*img1 = new Image();
+		img1.onload = createCroppedImg;
+		img1.src = 'Segment1.1.jpg';
+		img2 = new Image();
+		img2.onload = createCroppedImg;
+		img3 = new Image();
+		img3.onload = createCroppedImg;
+		img4 = new Image();
+		img4.onload = createCroppedImg;
+		*/
+		
+		var createCroppedImg = function(bottom, side1, top, side2){
+			var imgWidth = 1920;
+			var imgHeight = 1080;
+			
+			var canvas = document.createElement('canvas'),
+			ctx = canvas.getContext('2d');
+			canvas.width = 1920;
+			canvas.height = 290;
+			ctx.drawImage(side1, 20, 0, 1920, 290);
+			//canvas.position.set = (boxCenter.x, boxCenter.y+3, boxCenter.z);
+			//scene.add(canvas);
+			var texture = new THREE.Texture(canvas);
+			texture.needsUpdate = true;
+			return texture;
+		}
+		
+		//create canvas
+		var createCanvasTexture = function(top, right, bottom, left){
+			var imgWidth = 1920;
+			var imgHeight = 1080;
+			
+			var topCanvas = document.createElement('canvas'), 
+			ctxT = topCanvas.getContext('2d');
+			topCanvas.width = 1920;
+			topCanvas.height = 240;
+			ctxT.fillStyle = '#30acec';
+			ctxT.translate(topCanvas.width / 2, topCanvas.height / 2);
+			ctxT.rotate(-Math.PI/40);
+			ctxT.rotate(-Math.PI);
+			ctxT.translate(-topCanvas.width / 2, -topCanvas.height / 2);
+			ctxT.lineWidth = 1;
+			ctxT.fillRect(0.5, 0.5, topCanvas.width - 1, topCanvas.height - 1);
+			ctxT.drawImage(top, 0, -480, 1920, 1080);
+			
+			var rightCanvas = document.createElement('canvas'), 
+			ctxR = rightCanvas.getContext('2d');
+			rightCanvas.width = 1920;
+			rightCanvas.height = 240;
+			ctxR.fillStyle = '#30acec';
+			ctxR.translate(rightCanvas.width / 2, rightCanvas.height / 2);
+			ctxR.rotate(-Math.PI/30);
+			ctxR.rotate(-Math.PI);
+			ctxR.translate(-rightCanvas.width / 2, -rightCanvas.height / 2);
+			ctxR.lineWidth = 1;
+			ctxR.fillRect(0.5, 0.5, rightCanvas.width - 1, rightCanvas.height - 1);
+			ctxR.drawImage(right, 0, -475, 1920, 1080);
+			
+			var bottomCanvas = document.createElement('canvas'), 
+			ctxB = bottomCanvas.getContext('2d');
+			bottomCanvas.width = 1920;
+			bottomCanvas.height = 240;
+			ctxB.fillStyle = '#30acec';
+			ctxB.translate(bottomCanvas.width / 2, bottomCanvas.height / 2);
+			ctxB.rotate(-Math.PI/35);
+			ctxB.rotate(-Math.PI);
+			ctxB.translate(-bottomCanvas.width / 2, -bottomCanvas.height / 2);
+			ctxB.lineWidth = 1;
+			ctxB.fillRect(0.5, 0.5, bottomCanvas.width - 1, bottomCanvas.height - 1);
+			ctxB.drawImage(bottom, 0, -480, 1920, 1080);
+			
+			
+			var leftCanvas = document.createElement('canvas'), 
+			ctxL = leftCanvas.getContext('2d');
+			leftCanvas.width = 1920;
+			leftCanvas.height = 240;
+			ctxL.fillStyle = '#30acec';
+			ctxL.translate(leftCanvas.width / 2, leftCanvas.height / 2);
+			ctxL.rotate(-Math.PI/40);
+			ctxL.rotate(-Math.PI);
+			ctxL.translate(-leftCanvas.width / 2, -leftCanvas.height / 2);
+			ctxL.lineWidth = 1;
+			ctxL.fillRect(0.5, 0.5, leftCanvas.width - 1, leftCanvas.height - 1);
+			ctxL.drawImage(left, 0, -425, 1920, 1080);
+			
+			//var image = new Image();
+			//image.src = sideCanvas.toDataURL("image/jpg");
+			
+			var canvas = document.createElement('canvas'),
+			ctx = canvas.getContext('2d');
+			canvas.width = 960;
+			canvas.height = 1400;
+			ctx.fillStyle = '#30acec';
+			ctx.lineWidth = 1;
+			ctx.fillRect(0.5, 0.5, canvas.width - 1, canvas.height - 1);
+			//ctx.translate(imgWidth / 2, imgHeight / 2);
+			ctx.rotate(Math.PI/2);
+			//ctx.translate(-imgWidth / 2, -imgHeight / 2);
+			
+			ctx.drawImage(rightCanvas, -240, -720, 1920, 240);
+			ctx.drawImage(topCanvas, -410, -960, 1920, 240);
+			ctx.drawImage(bottomCanvas, -180, -480, 1900, 240);
+			ctx.drawImage(leftCanvas, -80, -240, 1920, 240);
+			var texture = new THREE.Texture(canvas);
+			texture.needsUpdate = true;
+			return texture;
+		};
+		
+		var beginTextureProcess = function(imgArr){
+			//while (imagesLoaded != 4){
+			//	console.log(imagesLoaded);
+			//}
+			
+			// Make map, and geometry, use real photo
+			//var picTex = new THREE.TextureLoader().load("Segment1.1.jpg");
+			var picMat = new THREE.MeshBasicMaterial({map: createCanvasTexture(imgArr[0], imgArr[1], imgArr[2], imgArr[3])});
+			//var picMat = new THREE.MeshBasicMaterial({color: 0xffff00, wireframe: true});
+			var picGeo = new THREE.CylinderGeometry(1, 1, 12, 32);
+			var picMesh = new THREE.Mesh(picGeo, picMat);
+			
+			scene.add(picMesh);
+			picMesh.rotation.x = 1.57;
+			picMesh.rotation.y = -2.25;
+			picMesh.position.set(boxCenter.x, boxCenter.y-3, boxCenter.z);
+			picMesh.scale.y = 0.5;
+			render();
+			console.log(picMesh);
+			
+		};
+		
+		var imgArr = [];
+		image1 = new Image();
+		image1.onload = imgArr.push(image1);
+		image1.src = "Segment1.1.jpg";
+		
+		image2 = new Image();
+		image2.onload = imgArr.push(image2);
+		image2.src = "Segment1.2.jpg";
+		
+		image3 = new Image();
+		image3.onload = imgArr.push(image3);
+		image3.src = "Segment1.3.jpg";
+		
+		image4 = new Image();
+		image4.onload = imgArr.push(image4);	
+		image4.src = "Segment1.4.jpg";
+		
+		//var image2 = loader.loadImage("Segment1.2.jpg");
+		//var image3 = loader.loadImage("Segment1.3.jpg");
+		//var image4 = loader.loadImage("Segment1.4.jpg");
+		
+		
+		// This is gross I'm sorry but its single thread
+		// Gives all the onloads time to push to the imgArr
+		var startTime = new Date();
+		while(new Date() - startTime < 1000){};
+		console.log(imgArr);
+		beginTextureProcess(imgArr);
+	
+		
+		render();
+		
+        let resize = function () {
+          renderer.setSize(window.innerWidth, window.innerHeight);
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          render();
+        };
+
+        window.addEventListener("resize",resize, false)
+       
+        
+      }
+    </script>
+  </head>
+  <body onload="mainFunction();">
+  <h1>Joseph Potter 3854504</h1>
+  </body>
+</html>
