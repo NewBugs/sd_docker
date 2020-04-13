@@ -2,8 +2,9 @@
 <html lang="en">
 
 <head>
-  <link href="bootstrap.min.css" rel="stylesheet" type="text/css" id="bootstrap-css">
-  <link href="primaryCSS.css" rel="stylesheet" type="text/css">
+  <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" id="bootstrap-css">
+  <link href="css/primaryCSS.css" rel="stylesheet" type="text/css">
+  <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css">
   <script src="jquery-3.4.1.min.js"></script>
   <script src="bootstrap.min.js"></script>
 
@@ -21,7 +22,7 @@
 
 <div id="throbber" style="display:none; min-height:120px;"></div>
 <div id="noty-holder"></div>
-<div id="container-fluid">
+<div id="container">
 
       <!-- Navigation -->
   <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -45,26 +46,60 @@
           </ul>
           <ul class="nav navbar-right top-nav">
             <form class="form-inline">
-              <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-              <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+              <input class="form-control mr-sm-2" id="myInput" type="search" placeholder="Search" aria-label="Search">
+              <!-- <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button> -->
             </form>
 
           </ul>
         </div>
   </nav>
+  <div class="col-xs-6 col-sm-1 sidebar-offcanvas" id="sidebarLeft" role="navigation">
 
-  <div class="jumbotron">
-    <div class="list-group">
-      <% for(var i=0; i < models.length; i++) {
-      var date = models[i].toISOString().substr(0,10);
-      %>
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+      <ul id="myBtnContainer" class="nav navbar-nav side-nav">
+          <!-- List available filters-->
+          <h5> Filters: </h5>
+          <button class="btn active" onclick="filterSelection('all')"> Show all</button>
+          <button class="btn" onclick="filterSelection('flags')"> Flags Detected</button>
+          <button class="btn" onclick="filterSelection('noflags')"> No Flags Detected </button>
+        </ul>
 
-        <button onclick="location.href = '/inspection?id=<%= models[i]%>&sid=1';" type="button" id="myButton" class="list-group-item list-group-item-action"> <%= date %> </button>
-      <% }; %>
     </div>
+
+      <!--/.well -->
   </div>
+  <div class="page-wrapper" style="margin-top: 50px;margin-left: 150px;">
 
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>Day of Inspection</th>
+          <th>Flags Detected</th>
+          <th>Cables Inspected</th>
+        </tr>
+      </thead>
+      <tbody id="myTable">
+        <% for(var i=0; i < results.length; i++) { 
+            var date = results[i].toISOString().substr(0,10);
+        %>
 
+        <tr  >
+          <td>
+            <a href="/inspection?id=<%=results[i]%>&sid=0"><%= date %></a>
+          </td>
+          <td>
+            <a href="/inspection?id=<%=results[i]%>&sid=0"><%= counts[i]%></a>
+          </td>
+          <td>
+            <a href="/inspection?id=<%=results[i]%>&sid=0">4</a>
+          </td>
+        </tr>
+        <% }; %>
+      </tbody>
+
+      
+    </table>
+  </div>
 
     <hr>
 
@@ -73,3 +108,63 @@
     </footer>
 
 </div>
+
+<script>
+  // Filter data based on search input
+  $(document).ready(function(){
+    $("#myInput").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+      $("#myTable tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
+    });
+  });
+
+  // Filters 
+  filterSelection("all")
+  function filterSelection(input) {
+    var table, tr, td, i;
+    table = document.getElementById("myTable");
+    tr = table.getElementsByTagName("tr");
+    for (i = 0; i < tr.length; i++) {
+      td = tr[i].getElementsByTagName("td")[1];
+ 
+      if (td) {
+        // Display all rows if the filter is "all"
+        if (input == "all"){
+          tr[i].style.display = "";
+        }
+        // If flag filter
+        else if (input == "flags") {
+          // Display data with a flag value of greater than 0
+          if (parseInt(td.innerText, 10) > 0)
+            tr[i].style.display = "";
+          else 
+            tr[i].style.display = "none";
+        } 
+        else if (input == "noflags") {
+          // Display data with no flag values of greater than 0
+          if (parseInt(td.innerText, 10) > 0)
+            tr[i].style.display = "none";
+          else 
+            tr[i].style.display = "";
+        }
+      }       
+    }
+  }
+
+
+  // Add active class to the current control button (highlight it)
+  var btnContainer = document.getElementById("myBtnContainer");
+  var btns = btnContainer.getElementsByClassName("btn");
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].addEventListener("click", function() {
+      var current = document.getElementsByClassName("btn active");
+      current[0].className = current[0].className.replace(" active", "");
+      this.className += " active";
+    });
+  }
+  </script>
+
+</body>
+</html>

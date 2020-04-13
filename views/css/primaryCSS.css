@@ -74,9 +74,9 @@ top-nav>li {
 @media(min-width:768px) {
     .side-nav {
         position: fixed;
-        top: 60px;
+        top: 50px;
         left: 0;
-        width: 150px;
+        width: 151px;
         border: inherit;
         border-radius: 0;
         border-top: 0px rgba(0,0,0,.5) solid;
@@ -117,7 +117,6 @@ top-nav>li {
 
     .col-sm-1{
         width: 150px;
-
       }
 }
 
@@ -163,6 +162,11 @@ top-nav>li {
     padding: 0px 10px;
 }
 
+div.collapse:nth-child(2) > ul:nth-child(1) > li:nth-child(1) > a:nth-child(1) {
+    margin-left: 20px;
+}
+   
+   
 .flag{
   position: absolute;
   margin: 200px;
@@ -196,6 +200,13 @@ top-nav>li {
     color: white;
 }
 
+h4 {
+    top: 90px;
+    left: 165px;
+    position: fixed;
+    color: white;
+}
+
 h3 {
   top: 50px;
   left: 165px;
@@ -206,6 +217,8 @@ h3 {
 h5 {
   margin: 10px;
   color: white;
+  /* font-weight: 500; */
+  font-size: medium;
 }
 
 .flagCable {
@@ -216,4 +229,33 @@ h5 {
   margin-top: 15px;
   width: 50%;
   margin-left: 25%;
+}
+
+.table {
+    margin-top: 50px;
+}
+
+.progress-bar {
+    background-color: gray;
+}
+
+.form-inline .form-control {
+    margin-right: 40px;
+    width: 200px;
+}
+
+.btn {
+    margin-top: 5px;
+    width: 150px;
+}
+
+/* Add a light grey background on mouse-over */
+.btn:hover {
+    background-color: #ddd;
+  }
+  
+/* Add a dark background to the active button */
+.btn.active {
+    background-color: #666;
+    color: white;
 }

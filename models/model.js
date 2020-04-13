@@ -12,7 +12,8 @@ const modelSchema = new Schema({
   original_image4_path: { type: String, required: true },
   model_path: { type: String, required: true },
   mesh_path: { type: String, required: true },
-  flagged: { type: Boolean, required: true }
+  flagged: { type: Boolean, required: true },
+  diameter: { type: Number, required: true}
 });
 
 module.exports = mongoose.model('model', modelSchema);
