@@ -1,5 +1,0 @@
-CutandFray.jpg none
-DoubleCut.jpg wear
-DoubleCut2.jpg wear
-Grind.jpg wear
-Undamaged.jpg none

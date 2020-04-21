@@ -16,3 +16,6 @@ views/css/font-awesome.min.css
 views/fonts
 oldData*
 views/Segment*
+openCV_docker/test.py
+openCV_docker/DefectDetection
+test.ps1

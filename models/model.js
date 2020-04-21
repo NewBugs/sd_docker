@@ -10,9 +10,8 @@ const modelSchema = new Schema({
   original_image2_path: { type: String, required: true },
   original_image3_path: { type: String, required: true },
   original_image4_path: { type: String, required: true },
-  model_path: { type: String, required: true },
-  mesh_path: { type: String, required: true },
   flagged: { type: Boolean, required: true },
+  flag_reason: { type: String, required: true },
   diameter: { type: Number, required: true}
 });
 

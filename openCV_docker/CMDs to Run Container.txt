@@ -1,0 +1,13 @@
+CMDs to Run Container
+
+# Old
+docker run -d -t opencv . 
+
+# New - For automation
+docker build --tag opencv .
+docker run --name opencv opencv
+
+
+docker start opencv
+docker inspect -f '{{.State.Running}}' opencv
+docker cp opencv:/defects.txt .

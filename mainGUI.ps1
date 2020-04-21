@@ -8,7 +8,7 @@ Add-Type -AssemblyName System.Windows.Forms
 
 $TestDemoForm                    = New-Object system.Windows.Forms.Form
 $TestDemoForm.ClientSize         = '450,400'
-$TestDemoForm.text               = "NewBug`'s Test Environment"
+$TestDemoForm.text               = "Inspection System Controls"
 $TestDemoForm.BackColor          = "#323131"
 $TestDemoForm.TopMost            = $false
 
@@ -149,22 +149,34 @@ function btnTransfer_Click {
 
     # Copy Drive Data to Docker folder
     if ((Test-Path -path $extDrivePath)) {
+            
+            
+            For($i = 1; $i -le 4; $i++){
+                For($j = 0; $j -le 3; $j++){
+                    $ProgressBar1.PerformStep();
+                    $FileName.text = "Moving Cable " + $i + " - Camera " + $j +" Data`n`n"
+                    $FileName.Refresh();
 
-        For($i = 1; $i -le 4; $i++){
-            For($j = 0; $j -le 3; $j++){
-                $ProgressBar1.PerformStep();
-                $FileName.text = "Moving Cable " + $i + " - Camera " + $j +" Data`n`n"
-                $FileName.Refresh();
+                    $dataInPath = $extDrivePath + '/cable' + $i + '/cam' + $j;
+                    $dataOutPath = $PSScriptRoot.toString() + '\views\data\unprocessed\images\cable' + $i + '\cam' + $j;
 
-                $dataInPath = $extDrivePath + '/cable' + $i + '/cam' + $j;
-                $dataOutPath = 'views/data/unprocessed/images/cable' + $i + '/cam' + $j;
+                    $moveJob = Start-Job -ScriptBlock {
+                        param(
+                        $dataInPath,
+                        $dataOutPath
+                        )
+                    Move-Item -Path $dataInPath -Destination $dataOutPath -Force | Out-Null
+                    New-Item -Path $dataInPath -ItemType Directory
+                    # Write-Host $dataOutPath
+                    } -ArgumentList $dataInPath,$dataOutPath
+                    Wait-Job $moveJob 
+                    Receive-Job $moveJob -OutVariable otest
+                    Remove-Job $moveJob
+                }
+                $dataInPath = $extDrivePath + '/cable' + $i + '/diameter' + $i +'.txt';
+                $dataOutPath = $PSScriptRoot.toString() + '\views\data\unprocessed\images\cable' + $i + '\diameter' + $i + '.txt';
                 Move-Item -Path $dataInPath -Destination $dataOutPath -Force | Out-Null
-                New-Item -Path $dataInPath -ItemType Directory
             }
-            $dataInPath = $extDrivePath + '/cable' + $i + '/diameter' + $i +'.txt';
-            $dataOutPath = 'views/data/unprocessed/images/cable' + $i + '/diameter' + $i + '.txt';
-            Move-Item -Path $dataInPath -Destination $dataOutPath -Force | Out-Null
-        }
 
         # Remove-Item $extDrivePath + '/cable1'
         # Remove-Item $extDrivePath + '/cable2'
@@ -172,6 +184,7 @@ function btnTransfer_Click {
         # Remove-Item $extDrivePath + '/cable4'
         # Remove-Item $extDrivePath
         # Alert the user the copy has finished
+
         $FileName.text = "Finished Transfer`n`n"
         $FileName.Refresh();
         $wshell.Popup("Transfer Complete",0,"Done",0x1)
@@ -180,6 +193,7 @@ function btnTransfer_Click {
         $wshell.Popup("External Drive Missing Files",0,"Error",0x1)
     }
     # $FileName.Visible = $true;
+    # Write-Host $PSScriptRoot.toString()
 }
 
 
@@ -225,9 +239,56 @@ function btnProcess_Click {
         $ProgressBar1.Step = 1;
         $ProgressBar1.Refresh();
 
-        $i = 0;
-        For($i = 0; $i -lt $txtContent1.count; $i++) {
+        $FileName.text = "Running Defect Detection on Cable 1`n`n";
+        $FileName.Refresh();
+
+        # DEFECT DETECTION Files
+        Move-Item -Path .\openCV_docker\DefectDetection.py -Destination .\views\data\unprocessed\images\cable1 -Force | Out-Null
+        Move-Item -Path .\openCV_docker\Dockerfile -Destination .\views\data\unprocessed\images\cable1 -Force | Out-Null
+
+        # Move directory to launch docker container
+        Set-Location -Path .\views\data\unprocessed\images\cable1
+
+        $job = Start-Job { 
+            # Add cam folders to container
+            docker build --tag opencv . | Out-Null
             
+            # Run container
+            docker run --name opencv opencv
+
+            $OutputVariable = docker inspect -f '{{.State.Running}}' opencv | Out-String
+            $OutputVariable = $OutputVariable -replace '[\W]', ''
+
+            # Wait for container to finish 
+            while ($OutputVariable -eq 'true'){
+                Start-Sleep 1
+                $OutputVariable = docker inspect -f '{{.State.Running}}' opencv | Out-String
+                $OutputVariable = $OutputVariable -replace '[\W]', ''
+            }
+            
+        }
+        Wait-Job $job
+        Receive-Job $job 
+        Remove-Job $job
+
+        # Copy defect.txt file from container to cable folder
+        docker cp opencv:defects.txt defects1.txt
+
+        # Remove opencv container
+        docker rm opencv
+
+        # Reset Defect programs
+        Set-Location -Path ../../../../..
+        Move-Item -Path .\views\data\unprocessed\images\cable1\DefectDetection.py -Destination .\openCV_docker -Force | Out-Null
+        Move-Item -Path .\views\data\unprocessed\images\cable1\Dockerfile -Destination .\openCV_docker -Force | Out-Null
+
+        # Read the defect file
+        $defectContent1 = Get-Content -Path "views/data/unprocessed/images/cable1/defects1.txt"
+
+        # Synchronizer
+        $i = 0;
+        $sid = 0;
+        For($i = 0; $i -lt $txtContent1.count; $i++) {
 
             # Create variables for the JSON payload
             $line = [string]$txtContent1[$i]
@@ -237,25 +298,31 @@ function btnProcess_Click {
             $img2 = "data/"+ $folderDate +"/images/cable1/cam2/" + [string]$cam2[$i];
             $img3 = "data/"+ $folderDate +"/images/cable1/cam3/" + [string]$cam3[$i];
 
-            # Need to UPDATE
-            $model = "/modelPath";
-            $mesh = "/meshPath";
-            $flag = "true"
+            # Get flags from defects txt
+            $dline = [string]$defectContent1[$i]
+            $ignore, $flagReason = $dline.split(' ');
+            
+            $flagReason = [string]$flagReason
+            if ($flagReason -eq "none"){
+                $flag = "false"
+            }
+            else {
+                $flag = "true"
+            }
             
             # Individual object
             $obj = New-Object pscustomobject
             # Properties 
             $obj | Add-Member NoteProperty "inspection_date" $dataDate
-            $obj | Add-Member NoteProperty "cable_section_id" $i
+            $obj | Add-Member NoteProperty "cable_section_id" $sid
             $obj | Add-Member NoteProperty "cable_number" '1'
             $obj | Add-Member NoteProperty "section_number" $sn
             $obj | Add-Member NoteProperty "original_image1_path" $img0
             $obj | Add-Member NoteProperty "original_image2_path" $img1
             $obj | Add-Member NoteProperty "original_image3_path" $img2
             $obj | Add-Member NoteProperty "original_image4_path" $img3
-            $obj | Add-Member NoteProperty "model_path" $model
-            $obj | Add-Member NoteProperty "mesh_path" $mesh
             $obj | Add-Member NoteProperty "flagged" $flag
+            $obj | Add-Member NoteProperty "flag_reason" $flagReason
             $obj | Add-Member NoteProperty "diameter" $diameter
 
             $jsonObject += $obj
@@ -264,6 +331,9 @@ function btnProcess_Click {
             $ProgressBar1.PerformStep();
             $FileName.text = "Moving Cable 1 Processed Data`n`n";
             $FileName.Refresh();
+
+            # Update section id
+            $sid++;
         }
     }
     $dataInPath = 'views/data/unprocessed/images/cable1/';
@@ -293,7 +363,53 @@ function btnProcess_Click {
         $ProgressBar1.Step = 1;
         $ProgressBar1.Refresh();
 
-        $i = 0;
+        $FileName.text = "Running Defect Detection on Cable 2`n`n";
+        $FileName.Refresh();
+
+        # DEFECT DETECTION Files
+        Move-Item -Path .\openCV_docker\DefectDetection.py -Destination .\views\data\unprocessed\images\cable2 -Force | Out-Null
+        Move-Item -Path .\openCV_docker\Dockerfile -Destination .\views\data\unprocessed\images\cable2 -Force | Out-Null
+
+        # Move directory to launch docker container
+        Set-Location -Path .\views\data\unprocessed\images\cable2
+
+        $job = Start-Job { 
+            # Add cam folders to container
+            docker build --tag opencv . | Out-Null
+            
+            # Run container
+            docker run --name opencv opencv
+
+            $OutputVariable = docker inspect -f '{{.State.Running}}' opencv | Out-String
+            $OutputVariable = $OutputVariable -replace '[\W]', ''
+
+            # Wait for container to finish 
+            while ($OutputVariable -eq 'true'){
+                Start-Sleep 1
+                $OutputVariable = docker inspect -f '{{.State.Running}}' opencv | Out-String
+                $OutputVariable = $OutputVariable -replace '[\W]', ''
+            }
+            
+        }
+        Wait-Job $job
+        Receive-Job $job 
+        Remove-Job $job
+
+        # Copy defect.txt file from container to cable folder
+        docker cp opencv:defects.txt defects2.txt
+
+        # Remove opencv container
+        docker rm opencv
+
+        # Reset Defect programs
+        Set-Location -Path ../../../../..
+        Move-Item -Path .\views\data\unprocessed\images\cable2\DefectDetection.py -Destination .\openCV_docker -Force | Out-Null
+        Move-Item -Path .\views\data\unprocessed\images\cable2\Dockerfile -Destination .\openCV_docker -Force | Out-Null
+
+        # Read the defect file
+        $defectContent2 = Get-Content -Path "views/data/unprocessed/images/cable2/defects2.txt"
+
+
         For($i = 0; $i -lt $txtContent2.count; $i++) {
 
             # Create variables for the JSON payload
@@ -304,25 +420,31 @@ function btnProcess_Click {
             $img2 = "data/"+ $folderDate +"/images/cable2/cam2/" + [string]$cam2[$i];
             $img3 = "data/"+ $folderDate +"/images/cable2/cam3/" + [string]$cam3[$i];
 
-            # Need to UPDATE
-            $model = "/modelPath";
-            $mesh = "/meshPath";
-            $flag = "true"
+            # Get flags from defects txt
+            $dline = [string]$defectContent2[$i]
+            $ignore, $flagReason = $dline.split(' ');
+            
+            $flagReason = [string]$flagReason
+            if ($flagReason -eq "none"){
+                $flag = "false"
+            }
+            else {
+                $flag = "true"
+            }
             
             # Individual object
             $obj = New-Object pscustomobject
             # Properties 
             $obj | Add-Member NoteProperty "inspection_date" $dataDate
-            $obj | Add-Member NoteProperty "cable_section_id" $i
-            $obj | Add-Member NoteProperty "cable_number" '1'
+            $obj | Add-Member NoteProperty "cable_section_id" $sid
+            $obj | Add-Member NoteProperty "cable_number" '2'
             $obj | Add-Member NoteProperty "section_number" $sn
             $obj | Add-Member NoteProperty "original_image1_path" $img0
             $obj | Add-Member NoteProperty "original_image2_path" $img1
             $obj | Add-Member NoteProperty "original_image3_path" $img2
             $obj | Add-Member NoteProperty "original_image4_path" $img3
-            $obj | Add-Member NoteProperty "model_path" $model
-            $obj | Add-Member NoteProperty "mesh_path" $mesh
             $obj | Add-Member NoteProperty "flagged" $flag
+            $obj | Add-Member NoteProperty "flag_reason" $flagReason
             $obj | Add-Member NoteProperty "diameter" $diameter
 
             $jsonObject += $obj
@@ -331,6 +453,9 @@ function btnProcess_Click {
             $ProgressBar1.PerformStep();
             $FileName.text = "Moving Cable 2 Processed Data`n`n";
             $FileName.Refresh();
+
+            # Update section id
+            $sid++;
         }
     }
     $dataInPath = 'views/data/unprocessed/images/cable2/';
@@ -360,7 +485,53 @@ function btnProcess_Click {
         $ProgressBar1.Step = 1;
         $ProgressBar1.Refresh();
 
-        $i = 0;
+        $FileName.text = "Running Defect Detection on Cable 3`n`n";
+        $FileName.Refresh();
+
+        # DEFECT DETECTION Files
+        Move-Item -Path .\openCV_docker\DefectDetection.py -Destination .\views\data\unprocessed\images\cable3 -Force | Out-Null
+        Move-Item -Path .\openCV_docker\Dockerfile -Destination .\views\data\unprocessed\images\cable3 -Force | Out-Null
+
+        # Move directory to launch docker container
+        Set-Location -Path .\views\data\unprocessed\images\cable3
+
+        $job = Start-Job { 
+            # Add cam folders to container
+            docker build --tag opencv . | Out-Null
+            
+            # Run container
+            docker run --name opencv opencv
+
+            $OutputVariable = docker inspect -f '{{.State.Running}}' opencv | Out-String
+            $OutputVariable = $OutputVariable -replace '[\W]', ''
+
+            # Wait for container to finish 
+            while ($OutputVariable -eq 'true'){
+                Start-Sleep 1
+                $OutputVariable = docker inspect -f '{{.State.Running}}' opencv | Out-String
+                $OutputVariable = $OutputVariable -replace '[\W]', ''
+            }
+            
+        }
+        Wait-Job $job
+        Receive-Job $job 
+        Remove-Job $job
+
+        # Copy defect.txt file from container to cable folder
+        docker cp opencv:defects.txt defects3.txt
+
+        # Remove opencv container
+        docker rm opencv
+
+        # Reset Defect programs
+        Set-Location -Path ../../../../..
+        Move-Item -Path .\views\data\unprocessed\images\cable3\DefectDetection.py -Destination .\openCV_docker -Force | Out-Null
+        Move-Item -Path .\views\data\unprocessed\images\cable3\Dockerfile -Destination .\openCV_docker -Force | Out-Null
+
+        # Read the defect file
+        $defectContent3 = Get-Content -Path "views/data/unprocessed/images/cable3/defects3.txt"
+
+
         For($i = 0; $i -lt $txtContent3.count; $i++) {
 
             # Create variables for the JSON payload
@@ -371,25 +542,31 @@ function btnProcess_Click {
             $img2 = "data/"+ $folderDate +"/images/cable3/cam2/" + [string]$cam2[$i];
             $img3 = "data/"+ $folderDate +"/images/cable3/cam3/" + [string]$cam3[$i];
 
-            # Need to UPDATE
-            $model = "/modelPath";
-            $mesh = "/meshPath";
-            $flag = "true"
+            # Get flags from defects txt
+            $dline = [string]$defectContent3[$i]
+            $ignore, $flagReason = $dline.split(' ');
+            
+            $flagReason = [string]$flagReason
+            if ($flagReason -eq "none"){
+                $flag = "false"
+            }
+            else {
+                $flag = "true"
+            }
             
             # Individual object
             $obj = New-Object pscustomobject
             # Properties 
             $obj | Add-Member NoteProperty "inspection_date" $dataDate
-            $obj | Add-Member NoteProperty "cable_section_id" $i
-            $obj | Add-Member NoteProperty "cable_number" '1'
+            $obj | Add-Member NoteProperty "cable_section_id" $sid
+            $obj | Add-Member NoteProperty "cable_number" '3'
             $obj | Add-Member NoteProperty "section_number" $sn
             $obj | Add-Member NoteProperty "original_image1_path" $img0
             $obj | Add-Member NoteProperty "original_image2_path" $img1
             $obj | Add-Member NoteProperty "original_image3_path" $img2
             $obj | Add-Member NoteProperty "original_image4_path" $img3
-            $obj | Add-Member NoteProperty "model_path" $model
-            $obj | Add-Member NoteProperty "mesh_path" $mesh
             $obj | Add-Member NoteProperty "flagged" $flag
+            $obj | Add-Member NoteProperty "flag_reason" $flagReason
             $obj | Add-Member NoteProperty "diameter" $diameter
 
             $jsonObject += $obj
@@ -397,6 +574,9 @@ function btnProcess_Click {
             $ProgressBar1.PerformStep();
             $FileName.text = "Moving Cable 3 Processed Data`n`n";
             $FileName.Refresh();
+
+            # Update section id
+            $sid++;
         }
     }
     $dataInPath = 'views/data/unprocessed/images/cable3';
@@ -426,7 +606,53 @@ function btnProcess_Click {
         $ProgressBar1.Step = 1;
         $ProgressBar1.Refresh();
 
-        $i = 0;
+        $FileName.text = "Running Defect Detection on Cable 4`n`n";
+        $FileName.Refresh();
+
+        # DEFECT DETECTION Files
+        Move-Item -Path .\openCV_docker\DefectDetection.py -Destination .\views\data\unprocessed\images\cable4 -Force | Out-Null
+        Move-Item -Path .\openCV_docker\Dockerfile -Destination .\views\data\unprocessed\images\cable4 -Force | Out-Null
+
+        # Move directory to launch docker container
+        Set-Location -Path .\views\data\unprocessed\images\cable4
+
+        $job = Start-Job { 
+            # Add cam folders to container
+            docker build --tag opencv . | Out-Null
+            
+            # Run container
+            docker run --name opencv opencv
+
+            $OutputVariable = docker inspect -f '{{.State.Running}}' opencv | Out-String
+            $OutputVariable = $OutputVariable -replace '[\W]', ''
+
+            # Wait for container to finish 
+            while ($OutputVariable -eq 'true'){
+                Start-Sleep 1
+                $OutputVariable = docker inspect -f '{{.State.Running}}' opencv | Out-String
+                $OutputVariable = $OutputVariable -replace '[\W]', ''
+            }
+            
+        }
+        Wait-Job $job
+        Receive-Job $job 
+        Remove-Job $job
+
+        # Copy defect.txt file from container to cable folder
+        docker cp opencv:defects.txt defects4.txt
+
+        # Remove opencv container
+        docker rm opencv
+
+        # Reset Defect programs
+        Set-Location -Path ../../../../..
+        Move-Item -Path .\views\data\unprocessed\images\cable4\DefectDetection.py -Destination .\openCV_docker -Force | Out-Null
+        Move-Item -Path .\views\data\unprocessed\images\cable4\Dockerfile -Destination .\openCV_docker -Force | Out-Null
+
+        # Read the defect file
+        $defectContent4 = Get-Content -Path "views/data/unprocessed/images/cable4/defects4.txt"
+
+
         For($i = 0; $i -lt $txtContent4.count; $i++) {
 
             # Create variables for the JSON payload
@@ -437,33 +663,43 @@ function btnProcess_Click {
             $img2 = "data/"+ $folderDate +"/images/cable4/cam2/" + [string]$cam2[$i];
             $img3 = "data/"+ $folderDate +"/images/cable4/cam3/" + [string]$cam3[$i];
 
-            # Need to UPDATE
-            $model = "/modelPath";
-            $mesh = "/meshPath";
-            $flag = "true"
+            # Get flags from defects txt
+            $dline = [string]$defectContent4[$i]
+            $ignore, $flagReason = $dline.split(' ');
+            
+            $flagReason = [string]$flagReason
+            if ($flagReason -eq "none"){
+                $flag = "false"
+            }
+            else {
+                $flag = "true"
+            }
             
             # Individual object
             $obj = New-Object pscustomobject
             # Properties 
             $obj | Add-Member NoteProperty "inspection_date" $dataDate
-            $obj | Add-Member NoteProperty "cable_section_id" $i
-            $obj | Add-Member NoteProperty "cable_number" '1'
+            $obj | Add-Member NoteProperty "cable_section_id" $sid
+            $obj | Add-Member NoteProperty "cable_number" '4'
             $obj | Add-Member NoteProperty "section_number" $sn
             $obj | Add-Member NoteProperty "original_image1_path" $img0
             $obj | Add-Member NoteProperty "original_image2_path" $img1
             $obj | Add-Member NoteProperty "original_image3_path" $img2
             $obj | Add-Member NoteProperty "original_image4_path" $img3
-            $obj | Add-Member NoteProperty "model_path" $model
-            $obj | Add-Member NoteProperty "mesh_path" $mesh
             $obj | Add-Member NoteProperty "flagged" $flag
+            $obj | Add-Member NoteProperty "flag_reason" $flagReason
             $obj | Add-Member NoteProperty "diameter" $diameter
 
             $jsonObject += $obj
 
             # Write-Host $jsonObject
             $ProgressBar1.PerformStep();
+            $ProgressBar1.Refresh();
             $FileName.text = "Moving Cable 4 Processed Data`n`n";
             $FileName.Refresh();
+
+            # Update section id
+            $sid++;
         }
     }   
     $dataInPath = 'views/data/unprocessed/images/cable4';
@@ -492,7 +728,7 @@ function btnInspection_Click {
 
     # Wait for Application to Laucnh
     $Button3.Enabled = $false
-    Start-Sleep 3
+    Start-Sleep 4
     Start-Process -FilePath http://localhost
 
     # Button to shutdown web application

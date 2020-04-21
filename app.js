@@ -32,16 +32,24 @@ if (fs.existsSync('newData.json')) {
   let modelData = fs.readFileSync('newData.json');
   let models = JSON.parse(modelData);
   model.insertMany(models) // using Mongoose
-  // console.log(models);
+  // console.log("XXXXXXXX ");
 
   // date 
   var datetime = new Date();
   var d = datetime.toISOString().slice(0,10);
   
   // Rename file to mark data as merged
-  fs.rename('newData.json', 'mergedData/oldData-'+d +'.json', function(err) {
-    if ( err ) console.log('ERROR: ' + err);
-  });
+  if (fs.existsSync('mergedData/oldData-'+d +'.json')) {
+    fs.unlinkSync('mergedData/oldData-'+d +'.json');
+    fs.rename('newData.json', 'mergedData/oldData-'+d +'.json', function(err) {
+      if ( err ) console.log('ERROR: ' + err);
+    });
+  } 
+  else {
+    fs.rename('newData.json', 'mergedData/oldData-'+d +'.json', function(err) {
+      if ( err ) console.log('ERROR: ' + err);
+    });
+  }
 } 
 // IDEA For Backup Data
 // else if (fs.existsSync('exportData.json')) {

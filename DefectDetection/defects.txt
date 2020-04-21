@@ -1,4 +1,0 @@
-0 fray
-1 none
-2 wear corrosion
-3 corrosion
