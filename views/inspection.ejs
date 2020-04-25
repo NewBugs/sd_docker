@@ -193,22 +193,46 @@
             <div class="page-wrapper">
               <!-- Canvas for Three.js-->
               <canvas id="myCanvasElement"></canvas>
-
+              
 
               <!-- Flag/Unflag Buttons w/ Header for Section-->
               <% models.forEach(function(model) { %>
                 <%  if (model.cable_section_id == sid && model.flagged == false) { %>
+
+                  <% if (Number(sid) != 0) { %>
+                    <a href="/inspection?id=<%= model.inspection_date%>&sid=<%= Number(sid)-1%>" style="position: fixed;left: 155px;font-size: 100px;top: 40%;color: white;">
+                      <span class="fa fa-angle-left"></span>
+                    </a>
+                  <% } %>
+
+                  <% if (Number(sid) != (models.length - 1)) { %>
+                    <a href="/inspection?id=<%= model.inspection_date%>&sid=<%= Number(sid)+1%>" style="position: fixed;right: 155px;font-size: 100px;top: 40%;color: white;">
+                      <span class="fa fa-angle-right"></span>
+                    </a>
+                  <% } %>
+
                   <h3>Cable: <%= model.cable_number%> - Section: <%= model.section_number%></h3>
                   <h4>Diameter: <%= model.diameter%> cm</h4>
                   <form method="POST" action="/inspection/flag?id=<%= model.inspection_date%>&sid=<%= sid%>">
                   <input type="submit" style="right:0; bottom:0;" id="flag" class="flag" value="FLAG">
-                </form>
 
               <% } else if (model.cable_section_id == sid && model.flagged == true) { %>
-                <h3 class="flagCable">Cable: <%= model.cable_number%> - Section: <%= model.section_number%></h3>
-                <h4 class="flagCable">Diameter: <%= model.diameter%> cm</h4>
-                <form method="POST" action="/inspection/unflag?id=<%= model.inspection_date%>&sid=<%= sid%>">
-                <input type="submit" style="right:0; bottom:0;" id="unflag" class="flag" value="UNFLAG">
+                <% if (Number(sid) != 0) { %>
+                  <a href="/inspection?id=<%= model.inspection_date%>&sid=<%= Number(sid)-1%>" style="position: fixed;left: 155px;font-size: 100px;top: 40%;color: orange;">
+                    <span class="fa fa-angle-left"></span>
+                  </a>
+                  <% } %>
+
+                  <% if (Number(sid) != (models.length - 1)) { %>
+                  <a href="/inspection?id=<%= model.inspection_date%>&sid=<%= Number(sid)+1%>" style="position: fixed;right: 155px;font-size: 100px;top: 40%;color: orange;">
+                    <span class="fa fa-angle-right"></span>
+                  </a>
+                  <% } %>
+
+                  <h3 class="flagCable">Cable: <%= model.cable_number%> - Section: <%= model.section_number%></h3>
+                  <h4 class="flagCable">Diameter: <%= model.diameter%> cm</h4>
+                  <form method="POST" action="/inspection/unflag?id=<%= model.inspection_date%>&sid=<%= sid%>">
+                  <input type="submit" style="right:0; bottom:0;" id="unflag" class="flag" value="UNFLAG">
               <% } }); %>
                 </form>
 

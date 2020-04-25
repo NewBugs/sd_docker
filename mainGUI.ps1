@@ -211,6 +211,11 @@ function btnProcess_Click {
 
     # Progress Bar Visible
     $ProgressBar1.Visible = $true;
+    $ProgressBar1.Minimum = 0;
+    $ProgressBar1.Maximum = 8;
+    $ProgressBar1.Value = 0;
+    $ProgressBar1.Step = 1;
+    $ProgressBar1.Refresh();
 
     # Create organized folder for processed data
     $dataOutPath = 'views/data/'+ $folderDate +'/images';
@@ -231,13 +236,6 @@ function btnProcess_Click {
         
         $cam3 = Get-ChildItem -Path 'views/data/unprocessed/images/cable1/cam3/' -Recurse
             Where-Object { $_.Extension -ne '.jpg' }
-
-        # Count how many files are in the cable folder 
-        $ProgressBar1.Minimum = 0;
-        $ProgressBar1.Maximum = $txtContent1.count;
-        $ProgressBar1.Value = 0;
-        $ProgressBar1.Step = 1;
-        $ProgressBar1.Refresh();
 
         $FileName.text = "Running Defect Detection on Cable 1`n`n";
         $FileName.Refresh();
@@ -270,6 +268,8 @@ function btnProcess_Click {
         Wait-Job $job
         Receive-Job $job 
         Remove-Job $job
+
+        $ProgressBar1.PerformStep();
 
         # Copy defect.txt file from container to cable folder
         docker cp opencv:defects.txt defects1.txt
@@ -328,7 +328,6 @@ function btnProcess_Click {
             $jsonObject += $obj
 
             # Write-Host $jsonObject
-            $ProgressBar1.PerformStep();
             $FileName.text = "Moving Cable 1 Processed Data`n`n";
             $FileName.Refresh();
 
@@ -338,6 +337,8 @@ function btnProcess_Click {
     }
     $dataInPath = 'views/data/unprocessed/images/cable1/';
     Move-Item -Path $dataInPath -Destination $dataOutPath -Force | Out-Null
+
+    $ProgressBar1.PerformStep();
 
     # GET CABLE 2
     $txtContent2 = Get-Content -Path "views/data/unprocessed/images/cable2/diameter2.txt"
@@ -355,13 +356,6 @@ function btnProcess_Click {
         
         $cam3 = Get-ChildItem -Path 'views/data/unprocessed/images/cable2/cam3/' -Recurse
             Where-Object { $_.Extension -ne '.jpg' }
-
-        # Count how many files are in the cable folder 
-        $ProgressBar1.Minimum = 0;
-        $ProgressBar1.Maximum = $txtContent2.count;
-        $ProgressBar1.Value = 0;
-        $ProgressBar1.Step = 1;
-        $ProgressBar1.Refresh();
 
         $FileName.text = "Running Defect Detection on Cable 2`n`n";
         $FileName.Refresh();
@@ -394,6 +388,8 @@ function btnProcess_Click {
         Wait-Job $job
         Receive-Job $job 
         Remove-Job $job
+
+        $ProgressBar1.PerformStep();
 
         # Copy defect.txt file from container to cable folder
         docker cp opencv:defects.txt defects2.txt
@@ -450,7 +446,6 @@ function btnProcess_Click {
             $jsonObject += $obj
             
             # Write-Host $jsonObject
-            $ProgressBar1.PerformStep();
             $FileName.text = "Moving Cable 2 Processed Data`n`n";
             $FileName.Refresh();
 
@@ -460,6 +455,8 @@ function btnProcess_Click {
     }
     $dataInPath = 'views/data/unprocessed/images/cable2/';
     Move-Item -Path $dataInPath -Destination $dataOutPath -Force | Out-Null
+
+    $ProgressBar1.PerformStep();
 
     # GET CABLE 3
     $txtContent3 = Get-Content -Path "views/data/unprocessed/images/cable3/diameter3.txt"
@@ -477,13 +474,6 @@ function btnProcess_Click {
         
         $cam3 = Get-ChildItem -Path 'views/data/unprocessed/images/cable3/cam3/' -Recurse
             Where-Object { $_.Extension -ne '.jpg' }
-
-        # Count how many files are in the cable folder 
-        $ProgressBar1.Minimum = 0;
-        $ProgressBar1.Maximum = $txtContent3.count;
-        $ProgressBar1.Value = 0;
-        $ProgressBar1.Step = 1;
-        $ProgressBar1.Refresh();
 
         $FileName.text = "Running Defect Detection on Cable 3`n`n";
         $FileName.Refresh();
@@ -516,6 +506,8 @@ function btnProcess_Click {
         Wait-Job $job
         Receive-Job $job 
         Remove-Job $job
+
+        $ProgressBar1.PerformStep();
 
         # Copy defect.txt file from container to cable folder
         docker cp opencv:defects.txt defects3.txt
@@ -571,7 +563,6 @@ function btnProcess_Click {
 
             $jsonObject += $obj
             # Write-Host $jsonObject
-            $ProgressBar1.PerformStep();
             $FileName.text = "Moving Cable 3 Processed Data`n`n";
             $FileName.Refresh();
 
@@ -581,6 +572,8 @@ function btnProcess_Click {
     }
     $dataInPath = 'views/data/unprocessed/images/cable3';
     Move-Item -Path $dataInPath -Destination $dataOutPath -Force | Out-Null
+
+    $ProgressBar1.PerformStep();
 
     # GET CABLE 4
     $txtContent4 = Get-Content -Path "views/data/unprocessed/images/cable4/diameter4.txt"
@@ -598,13 +591,6 @@ function btnProcess_Click {
         
         $cam3 = Get-ChildItem -Path 'views/data/unprocessed/images/cable4/cam3/' -Recurse
             Where-Object { $_.Extension -ne '.jpg' }
-
-        # Count how many files are in the cable folder 
-        $ProgressBar1.Minimum = 0;
-        $ProgressBar1.Maximum = $txtContent4.count;
-        $ProgressBar1.Value = 0;
-        $ProgressBar1.Step = 1;
-        $ProgressBar1.Refresh();
 
         $FileName.text = "Running Defect Detection on Cable 4`n`n";
         $FileName.Refresh();
@@ -637,6 +623,8 @@ function btnProcess_Click {
         Wait-Job $job
         Receive-Job $job 
         Remove-Job $job
+
+        $ProgressBar1.PerformStep();
 
         # Copy defect.txt file from container to cable folder
         docker cp opencv:defects.txt defects4.txt
@@ -694,7 +682,6 @@ function btnProcess_Click {
 
             # Write-Host $jsonObject
             $ProgressBar1.PerformStep();
-            $ProgressBar1.Refresh();
             $FileName.text = "Moving Cable 4 Processed Data`n`n";
             $FileName.Refresh();
 
@@ -704,6 +691,9 @@ function btnProcess_Click {
     }   
     $dataInPath = 'views/data/unprocessed/images/cable4';
     Move-Item -Path $dataInPath -Destination $dataOutPath -Force | Out-Null
+
+    $ProgressBar1.Value = 8;
+    $ProgressBar1.Refresh();
 
     # Convert Object Array to Json Payload
     $jsonObject | ConvertTo-Json -depth 100 | Set-Content "newData.json"
@@ -737,9 +727,13 @@ function btnInspection_Click {
     
 }
 
-function btnInspectionShutdown_Click { 
+function btnInspectionShutdown_Click {
+    $FileName.text = "Shutting Down`n`n";
+    $FileName.Refresh();
+
     Write-Output "docker-compose stop"
     docker-compose stop 
+
 
     # Disable shutdown and enable launch buttons
     $ShutdownIVA.Enabled = $false
@@ -792,9 +786,18 @@ function btnBackup_Click {
 
                     $dataInPath = $names[$a].FullName + '\cable' + $i;
                     $dataOutPath = $env:USERPROFILE + '\Desktop\backupData\' + $names[$a].FullName.substring($folderNameIndex, 17) + '\cable' + $i + '\';
+                    
+                    $copyjob = Start-Job {
+                        param(
+                        $dataInPath,
+                        $dataOutPath
+                        )
                     Copy-Item -Path $dataInPath -Destination $dataOutPath -Recurse | Out-Null
                     # Write-Host $dataInPath
-
+                    } -ArgumentList $dataInPath,$dataOutPath
+                    Wait-Job $copyjob
+                    Receive-Job $copyjob 
+                    Remove-Job $copyjob
                 }
             }
 
